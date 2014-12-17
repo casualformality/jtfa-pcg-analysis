@@ -6,7 +6,7 @@
 % locations of the heart sounds amidst the noise and possible murmurs.
 
 % Load the file
-[f, fs] = audioread('heart sounds/ps.wav');
+[f, fs] = audioread('normal.wav');
 t = (1/fs)*(1:length(f));
 
 % Take the hilbert transform of the original signal
