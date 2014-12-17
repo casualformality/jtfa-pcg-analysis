@@ -41,20 +41,24 @@ second_locs = second_peaks - second_offset;
 second_locs = second_locs(second_locs > first_locs(1));
 
 % Take the average of the CWTs of each of the sets of recorded heart sounds
-first_cwt_tmp = cwt(dec_f(first_locs(1):(first_locs(1)+(first_offset*2))), 1:32, 'db8');
+first_sound = dec_f(first_locs(1):(first_locs(1)+(first_offset*2)));
+first_cwt_tmp = cwt(first_sound, 1:8, 'db8');
 first_cwt_width = size(first_cwt_tmp, 1);
 first_cwt_depth = size(first_cwt_tmp, 2);
 first_cwts = zeros(first_cwt_width, first_cwt_depth, length(second_locs));
-for i = 1:length(second_locs)
-    first_cwts(:,:,i) = cwt(dec_f(first_locs(i):(first_locs(i)+(first_offset*2))), 1:32, 'db8');
+first_cwts(:,:,1) = first_cwt_tmp;
+for i = 2:length(second_locs)
+    first_cwts(:,:,i) = cwt(dec_f(first_locs(i):(first_locs(i)+(first_offset*2))), 1:8, 'db8');
 end
 
-second_cwt_tmp = cwt(dec_f(second_locs(1):(second_locs(1)+(second_offset*2))), 1:32, 'db8');
+second_sound = dec_f(second_locs(1):(second_locs(1)+(second_offset*2)));
+second_cwt_tmp = cwt(second_sound, 1:8, 'db8');
 second_cwt_width = size(second_cwt_tmp, 1);
 second_cwt_depth = size(second_cwt_tmp, 2);
 second_cwts = zeros(second_cwt_width, second_cwt_depth, length(second_locs)-1);
-for i = 1:(length(first_locs)-1)
-    second_cwts(:,:,i) = cwt(dec_f(second_locs(i):(second_locs(i)+(second_offset*2))), 1:32, 'db8');
+second_cwts(:,:,1) = second_cwt_tmp;
+for i = 2:(length(first_locs)-1)
+    second_cwts(:,:,i) = cwt(dec_f(second_locs(i):(second_locs(i)+(second_offset*2))), 1:8, 'db8');
 end
 
 % This returns a 1xMxN matrix, make this an MxN matrix!
@@ -64,21 +68,27 @@ mean_second_cwt = mean(second_cwts, 3);
 % Plot the output
 figure;
 subplot(3, 1, 1);
+hold on;
 plot(dec_t, dec_f);
+plot(first_locs/dec_fs, dec_f(first_locs), 'g+');
+plot(second_locs/dec_fs, dec_f(second_locs), 'r*');
+hold off;
 title('Full Recording');
 
 subplot(3, 2, 3);
-plot(dec_t(first_locs(1):(first_locs(1)+(first_offset*2))), dec_f(first_locs(1):(first_locs(1)+(first_offset*2))));
+plot(dec_t(1:length(first_sound)), first_sound);
 title('First Heart Sound');
 
 subplot(3, 2, 4);
-plot(dec_t(second_locs(1):(second_locs(1)+(second_offset*2))), dec_f(second_locs(1):(second_locs(1)+(second_offset*2))));
+plot(dec_t(1:length(second_sound)), second_sound);
 title('Second Heart Sound');
 
 subplot(3, 2, 5);
-imagesc(abs(mean_first_cwt));
+plot(dec_t(1:size(mean_first_cwt, 2)), mean_first_cwt(2,:));
+%imagesc(abs(mean_first_cwt));
 title('CWT of First Heart Sounds');
 
 subplot(3, 2, 6);
-imagesc(abs(mean_second_cwt));
+plot(dec_t(1:size(mean_second_cwt, 2)), mean_second_cwt(2,:));
+%imagesc(abs(mean_second_cwt));
 title('CWT of Second Heart Sounds');
