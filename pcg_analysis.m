@@ -9,16 +9,14 @@
 [f, fs] = audioread('normal.wav');
 t = (1/fs)*(1:length(f));
 
-% Take the hilbert transform of the original signal
-hil_f = hilbert(f);
-
 % Decimate the resulting waveform with a 100 Hz low-pass filter
 dec_factor = 80;
-dec_f = decimate(hil_f, dec_factor);
+dec_f = decimate(f, dec_factor);
 dec_t = (1/(fs/dec_factor))*(1:length(dec_f));
 dec_fs = fs / dec_factor;
 
-abs_f = abs(dec_f);
+hil_f = hilbert(dec_f);
+abs_f = abs(hil_f);
 
 % Separate the heart sounds, and put them in an array.
 % This is a pre-processing step before we can take the
@@ -41,7 +39,7 @@ second_locs = second_peaks - second_offset;
 second_locs = second_locs(second_locs > first_locs(1));
 
 % Take the average of the CWTs of each of the sets of recorded heart sounds
-first_sound = dec_f(first_locs(1):(first_locs(1)+(first_offset + second_offset)));
+first_sound = dec_f(first_locs(2):(first_locs(2)+(first_offset + second_offset)));
 first_cwt_tmp = cwt(first_sound, 1:8, 'db8');
 first_cwt_width = size(first_cwt_tmp, 1);
 first_cwt_depth = size(first_cwt_tmp, 2);
